@@ -1,0 +1,40 @@
+---
+title: "Pointe-aux-Outardes"
+output:
+  html_document:
+    toc: false
+---
+
+<style type="text/css">
+.main-container {
+  max-width: 1800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
+
+```{r, echo = FALSE, warnings = FALSE, message = FALSE, fig.width = 14, fig.height = 7}
+library(pao)
+# Site de recharge
+recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>% st_zm()
+recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_construction.shp', quiet = TRUE) %>% st_zm()
+recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>% st_zm()
+
+# Dynamique hydro
+dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)
+
+# Bathy
+# bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m_HS.tif")
+# bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
+#
+# x <- mape
+
+
+# Mapview
+mv <- mapview(recharge_arriere) +
+  mapview(recharge_bas) +
+  mapview(recharge_crete) +
+  mapview(dynamique_hydro)
+
+mv
+```
