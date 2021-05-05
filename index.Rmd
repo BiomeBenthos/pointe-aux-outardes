@@ -25,13 +25,17 @@ dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynami
 
 # Bathy
 # bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m_HS.tif")
-# bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
-#
-# x <- mape
+bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
+bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(seq(-15,1, by = 1),35))
+tmp <- st_read('analysis/data/tmp.geojson', quiet = TRUE)
+bathymetrie <- st_intersection(bathymetrie, tmp)
+# x <- mapedit::editMap()
+# bathymetrie <- bathy[tmp]
 
 
 # Mapview
-mv <- mapview(recharge_arriere) +
+mv <- mapview(bathymetrie[,1]) +
+  mapview(recharge_arriere) +
   mapview(recharge_bas) +
   mapview(recharge_crete) +
   mapview(dynamique_hydro)
