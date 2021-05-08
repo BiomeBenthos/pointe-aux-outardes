@@ -21,20 +21,20 @@ recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_constructio
 recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>% st_zm()
 
 # Dynamique hydro
-dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)
+# dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)
 
 # Bathy
 # bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m_HS.tif")
-bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
+# bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
 # bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(seq(-15,1, by = 1),35))
-bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(-15,0,35))
-tmp <- st_read('analysis/data/tmp.geojson', quiet = TRUE)
-bathymetrie0 <- st_intersection(bathymetrie, tmp)
+# bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(-15,0,35))
+# tmp <- st_read('analysis/data/tmp.geojson', quiet = TRUE)
+# bathymetrie0 <- st_intersection(bathymetrie, tmp)
 # x <- mapedit::editMap()
 # bathymetrie <- bathy[tmp]
 
 zones <- st_read("./data/zones.geojson", quiet = TRUE)
-
+bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE)
 
 # Mapview
 mv <- mapview(bathymetrie0[,1]) +
