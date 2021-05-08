@@ -18,7 +18,7 @@ bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(-15,0,35))
 tmp <- st_read('analysis/data/tmp.geojson', quiet = TRUE)
 bathymetrie <- st_intersection(bathymetrie, tmp)
 bathymetrie <- st_transform(bathymetrie, st_crs(recharge_crete))
-st_write(bathymetrie, './data/bathymetrie.geojson')
+st_write(bathymetrie, './data/bathymetrie.geojson', delete_dsn = TRUE)
 
 # Centroide du site de recharge le long de la ligne de 0 bathymétrie
 xyz <- st_point_on_surface(recharge_crete) %>%
