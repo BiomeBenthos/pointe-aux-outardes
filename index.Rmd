@@ -16,9 +16,23 @@ output:
 ```{r, echo = FALSE, warnings = FALSE, message = FALSE, fig.width = 14, fig.height = 7}
 library(pao)
 # Site de recharge
-recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>% st_zm()
-recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_construction.shp', quiet = TRUE) %>% st_zm()
-recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>% st_zm()
+recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>%
+                    st_zm() %>% mutate(description = 'Recharge arriève') %>%
+                    select(-OBJECTID, -Shape_Leng)
+
+recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_construction.shp', quiet = TRUE) %>%
+                st_zm() %>% mutate(description = 'Recharge bas') %>%
+                select(-OBJECTID, -Shape_Leng)
+
+recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>%
+                  st_zm() %>% mutate(description = 'Recharge crête') %>%
+                  select(-OBJECTID, -Shape_Leng)
+
+recharge_equilibre <- st_read('analysis/data/recharge_equilibre_shp/recharge_equilibre.shp', quiet = TRUE) %>%
+                      mutate(description = c("Recharge arrière équilibre","Recharge haut équilibre", "Recharge bas équilibre")) %>%
+                      select(-descrption, -OBJECTID, -SHAPE_Leng)
+
+recharge <- rbind(recharge_arriere, recharge_bas, recharge_crete, recharge_equilibre)
 
 # Dynamique hydro
 # dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)
@@ -36,17 +50,21 @@ recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_constru
 zones <- st_read("./data/zones.geojson", quiet = TRUE)
 sous_zones <- st_read("./data/sous_zones.geojson", quiet = TRUE)
 samples <- st_read("./data/samples.geojson", quiet = TRUE)
-bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE)
+bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE) %>%
+                mutate(name = "Bathymétrie 0m") %>%
+                select(name)
 
 # Mapview
-mv <- mapview(bathymetrie0[,1]) +
-  mapview(zones) +
-  mapview(sous_zones) +
-  mapview(samples, cex = 4)
+mv <- mapview(bathymetrie0) +
+      mapview(recharge, lwd = 4) +
+      mapview(zones) +
+      mapview(sous_zones) +
+      mapview(samples, cex = 4)
 
 mv
 
 # Table of stations
+samples <- st_transform(samples, 4326)
 xy <- st_coordinates(samples)
 prj <- st_crs(samples)
 samples <- st_drop_geometry(samples)
