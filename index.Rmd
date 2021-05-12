@@ -45,4 +45,13 @@ mv <- mapview(bathymetrie0[,1]) +
   mapview(samples, cex = 4)
 
 mv
+
+# Table of stations
+xy <- st_coordinates(samples)
+prj <- st_crs(samples)
+samples <- st_drop_geometry(samples)
+samples <- cbind(samples, xy)
+cat(paste0('Projection: ', prj$input, ' (EPSG: ', prj$epsg, ')'))
+knitr::kable(samples, col.names = c('Station', 'Longitude','Latitude')) %>%
+    kableExtra::kable_styling(full_width = F, position = "left")
 ```
