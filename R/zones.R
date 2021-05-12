@@ -274,5 +274,6 @@ for(i in 1:nrow(sous_zones)) {
   samples[[i]] <- sampling(sous_zones[i, ])
 }
 samples <- bind_rows(samples)
+st_write(samples, './data/samples.geojson')
 
 mapview(zones) + mapview(sous_zones) + mapview(samples)

@@ -34,14 +34,15 @@ recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_constru
 # bathymetrie <- bathy[tmp]
 
 zones <- st_read("./data/zones.geojson", quiet = TRUE)
+sous_zones <- st_read("./data/sous_zones.geojson", quiet = TRUE)
+samples <- st_read("./data/samples.geojson", quiet = TRUE)
 bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE)
 
 # Mapview
 mv <- mapview(bathymetrie0[,1]) +
-  mapview(recharge_arriere) +
-  mapview(recharge_bas) +
-  mapview(recharge_crete) +
-  mapview(zones)
+  mapview(zones) +
+  mapview(sous_zones) +
+  mapview(samples, cex = 4)
 
 mv
 ```
