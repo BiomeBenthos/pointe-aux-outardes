@@ -1,13 +1,27 @@
 library(pao)
 # Site de recharge
-# recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>% st_zm()
-# recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_construction.shp', quiet = TRUE) %>% st_zm()
-recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>% st_zm()
+recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>%
+                    st_zm() %>% mutate(description = 'Recharge arriève') %>%
+                    select(-OBJECTID, -Shape_Leng)
 
-# Dynamique hydro
-# dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)
+recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_construction.shp', quiet = TRUE) %>%
+                st_zm() %>% mutate(description = 'Recharge bas') %>%
+                select(-OBJECTID, -Shape_Leng)
 
-# Bathy
+recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>%
+                  st_zm() %>% mutate(description = 'Recharge crête') %>%
+                  select(-OBJECTID, -Shape_Leng)
+
+recharge_equilibre <- st_read('analysis/data/recharge_equilibre_shp/recharge_equilibre.shp', quiet = TRUE) %>%
+                      mutate(description = c("Recharge arrière équilibre","Recharge haut équilibre", "Recharge bas équilibre")) %>%
+                      select(-descrption, -OBJECTID, -SHAPE_Leng)
+
+recharge <- rbind(recharge_arriere, recharge_bas, recharge_crete, recharge_equilibre)
+uid <- recharge$description %in% c('Recharge bas équilibre','Recharge haut équilibre','Recharge bas')
+recharge <- recharge[uid, ]
+st_write(recharge, './data/recharge.geojson')
+
+# Bathymétrie
 # bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m_HS.tif")
 # bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
 # bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(seq(-15,1, by = 1),35))
@@ -22,14 +36,43 @@ recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_constru
 bathymetrie <- st_read('./data/bathymetrie.geojson')
 
 # Centroide du site de recharge le long de la ligne de 0 bathymétrie
-xyz <- st_point_on_surface(recharge_crete) %>%
+uid <- recharge$description == 'Recharge haut équilibre'
+xy <- st_point_on_surface(recharge[uid,]) %>%
+      st_sf()
+
+distance_to_0 <- xy %>%
+                 st_nearest_points(bathymetrie) %>%
+                 st_cast("POINT") %>%
+                 st_distance() %>%
+                 .[2,1] %>%
+                 units::drop_units()
+
+bathy_adj <- bathymetrie %>%
+             st_buffer(-(distance_to_0), endCapStyle = "SQUARE", singleSide = TRUE) %>%
+             st_cast("LINESTRING") %>%
+             st_difference(st_buffer(bathymetrie, (distance_to_0-1), endCapStyle = "SQUARE"))
+
+
+bathymetrie <- bathy_adj
+
+
+
+# Zones
+xy <- st_cast(recharge_crete, "POINT") %>%
+       .[c(1,nrow(.)),] %>%
+       st_sf()
+
+xym <- st_point_on_surface(recharge_crete) %>%
+       st_sf()
+d <- 660
+xyz <- xym %>%
        st_nearest_points(bathymetrie) %>%
        st_cast("POINT") %>%
        .[2,] %>%
        st_as_sf()
 
 # Sites autour de la recharge
-buf <- st_buffer(xyz, 800) %>%
+buf <- st_buffer(xyz, d) %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
@@ -60,7 +103,7 @@ SiE <- buf[2, ] %>%
        .[2,]
 
 SiE <- SiE %>%
-       st_buffer(800) %>%
+       st_buffer(d) %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
@@ -81,7 +124,7 @@ RfE <- buf[2, ] %>%
        .[2,]
 
 RfE <- RfE %>%
-       st_buffer(800) %>%
+       st_buffer(d) %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
@@ -105,7 +148,7 @@ SiO <- quai %>%
        .[1,]
 
 SiO <- SiO %>%
-       st_buffer(800) %>%
+       st_buffer(d) %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
@@ -125,7 +168,7 @@ RfO <- quai %>%
        .[1,]
 
 RfO <- RfO %>%
-       st_buffer(800) %>%
+       st_buffer(d) %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
@@ -181,57 +224,66 @@ subzones <- function(x, name, r = FALSE, pt = FALSE) {
 
   # Proche
   ## 50-75m
-  pr50 <- rbind(p6[3:4, ], p5[4:3,]) %>%
+  # pr50 <- rbind(p6[3:4, ], p5[4:3,]) %>%
+  pr50 <- rbind(p6[1:2, ], p5[2:1,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-Pr-50')))
 
   ## 75-100m
-  pr75 <- rbind(p6[4:5, ], p5[5:4,]) %>%
+  # pr75 <- rbind(p6[4:5, ], p5[5:4,]) %>%
+  pr75 <- rbind(p6[2:3, ], p5[3:2,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-Pr-75')))
 
   ## 225-250
-  pr225 <- rbind(p6[10:11, ], p5[11:10,]) %>%
+  # pr225 <- rbind(p6[10:11, ], p5[11:10,]) %>%
+  pr225 <- rbind(p6[8:9, ], p5[9:8,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-Pr-225')))
 
   # Moyenne
   ## 50-75m
-  mo50 <- rbind(p5[3:4, ], p4[4:3,]) %>%
+  # mo50 <- rbind(p5[3:4, ], p4[4:3,]) %>%
+  mo50 <- rbind(p5[1:2, ], p4[2:1,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-Mo-50')))
 
   ## 75-100m
-  mo75 <- rbind(p5[4:5, ], p4[5:4,]) %>%
+  # mo75 <- rbind(p5[4:5, ], p4[5:4,]) %>%
+  mo75 <- rbind(p5[2:3, ], p4[3:2,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-Mo-75')))
 
   ## 225-250
-  mo225 <- rbind(p5[10:11, ], p4[11:10,]) %>%
+  # mo225 <- rbind(p5[10:11, ], p4[11:10,]) %>%
+  mo225 <- rbind(p5[8:9, ], p4[9:8,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-Mo-225')))
 
   # Éloigné
   ## 50-75m
-  el50 <- rbind(p4[3:4, ], p3[4:3,]) %>%
+  # el50 <- rbind(p4[3:4, ], p3[4:3,]) %>%
+  el50 <- rbind(p4[1:2, ], p3[2:1,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-El-50')))
 
   ## 75-100m
-  el75 <- rbind(p4[4:5, ], p3[5:4,]) %>%
+  # el75 <- rbind(p4[4:5, ], p3[5:4,]) %>%
+  el75 <- rbind(p4[2:3, ], p3[3:2,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-El-75')))
 
   ## 225-250
-  el225 <- rbind(p4[10:11, ], p3[11:10,]) %>%
+  # el225 <- rbind(p4[10:11, ], p3[11:10,]) %>%
+  el225 <- rbind(p4[8:9, ], p3[9:8,]) %>%
           st_combine() %>%
           st_cast("POLYGON") %>%
           st_sf(data.frame(name = paste0(name, '-El-225')))

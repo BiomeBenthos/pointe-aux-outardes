@@ -15,40 +15,7 @@ output:
 
 ```{r, echo = FALSE, warnings = FALSE, message = FALSE, fig.width = 14, fig.height = 7}
 library(pao)
-# Site de recharge
-recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>%
-                    st_zm() %>% mutate(description = 'Recharge arriève') %>%
-                    select(-OBJECTID, -Shape_Leng)
-
-recharge_bas <- st_read('analysis/data/PTO/Recharge_shp/bas_recharge_construction.shp', quiet = TRUE) %>%
-                st_zm() %>% mutate(description = 'Recharge bas') %>%
-                select(-OBJECTID, -Shape_Leng)
-
-recharge_crete <- st_read('analysis/data/PTO/Recharge_shp/crete_recharge_construction.shp', quiet = TRUE) %>%
-                  st_zm() %>% mutate(description = 'Recharge crête') %>%
-                  select(-OBJECTID, -Shape_Leng)
-
-recharge_equilibre <- st_read('analysis/data/recharge_equilibre_shp/recharge_equilibre.shp', quiet = TRUE) %>%
-                      mutate(description = c("Recharge arrière équilibre","Recharge haut équilibre", "Recharge bas équilibre")) %>%
-                      select(-descrption, -OBJECTID, -SHAPE_Leng)
-
-recharge <- rbind(recharge_arriere, recharge_bas, recharge_crete, recharge_equilibre)
-uid <- recharge$description %in% c('Recharge bas équilibre','Recharge haut équilibre','Recharge bas')
-recharge <- recharge[uid, ]
-
-# Dynamique hydro
-# dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)
-
-# Bathy
-# bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m_HS.tif")
-# bathy <- read_stars("analysis/data/PTO/Bathy_SHC_2015/Rasters/Bathy_2015_SHC_5m.tif")
-# bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(seq(-15,1, by = 1),35))
-# bathymetrie <- st_contour(bathy, contour_lines = TRUE, breaks = c(-15,0,35))
-# tmp <- st_read('analysis/data/tmp.geojson', quiet = TRUE)
-# bathymetrie0 <- st_intersection(bathymetrie, tmp)
-# x <- mapedit::editMap()
-# bathymetrie <- bathy[tmp]
-
+recharge <- st_read("./data/recharge.geojson", quiet = TRUE)
 zones <- st_read("./data/zones.geojson", quiet = TRUE)
 sous_zones <- st_read("./data/sous_zones.geojson", quiet = TRUE)
 samples <- st_read("./data/samples.geojson", quiet = TRUE)
