@@ -33,6 +33,8 @@ recharge_equilibre <- st_read('analysis/data/recharge_equilibre_shp/recharge_equ
                       select(-descrption, -OBJECTID, -SHAPE_Leng)
 
 recharge <- rbind(recharge_arriere, recharge_bas, recharge_crete, recharge_equilibre)
+uid <- recharge$description %in% c('Recharge bas équilibre','Recharge haut équilibre','Recharge bas')
+recharge <- recharge[uid, ]
 
 # Dynamique hydro
 # dynamique_hydro <- st_read("analysis/data/dynamique_hydrosedimentaire_shp/dynamique_hydrosed.shp", quiet = TRUE)

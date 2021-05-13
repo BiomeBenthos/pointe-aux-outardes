@@ -85,7 +85,7 @@ RfE <- RfE %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
-       .[1,] %>%
+       .[2,] %>%
        bind_rows(RfE) %>%
        st_union() %>%
        st_cast("LINESTRING") %>%
@@ -129,7 +129,7 @@ RfO <- RfO %>%
        st_cast("LINESTRING") %>%
        st_intersection(bathymetrie) %>%
        st_cast("POINT") %>%
-       .[2,] %>%
+       .[1,] %>%
        bind_rows(RfO) %>%
        st_union() %>%
        st_cast("LINESTRING") %>%
@@ -248,7 +248,7 @@ SiOsub <- subzones(SiO, 'SiO', r = TRUE)
 RfOsub <- subzones(RfO, 'RfO', r = TRUE, pt = TRUE)
 
 sous_zones <- rbind(ReOsub, ReEsub, SiEsub, RfEsub, SiOsub, RfOsub)
-st_write(sous_zones, './data/sous_zones.geojson')
+st_write(sous_zones, './data/sous_zones.geojson', delete_dsn = TRUE)
 
 
 # =~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-=~-
@@ -274,6 +274,6 @@ for(i in 1:nrow(sous_zones)) {
   samples[[i]] <- sampling(sous_zones[i, ])
 }
 samples <- bind_rows(samples)
-st_write(samples, './data/samples.geojson')
+st_write(samples, './data/samples.geojson', delete_dsn = TRUE)
 
 mapview(zones) + mapview(sous_zones) + mapview(samples)
