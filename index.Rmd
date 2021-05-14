@@ -28,12 +28,14 @@ uid5 <- stringr::str_detect(tmp, '-5x')
 uid <- as.logical(uid1 + uid2 + uid3 + uid4 + uid5)
 stations <- samples[uid, ]
 stations_supplementaires <- samples[!uid, ]
+st_write(stations, './data/stations.kml')
+st_write(stations_supplementaires, './data/stations_supplementaires.kml')
 bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE) %>%
                 mutate(name = "Bathymétrie 0m") %>%
                 select(name)
 
 # Mapview
-mv <- mapview(bathymetrie0, hide = TRUE) +
+mv <- mapview(bathymetrie0) +
       mapview(recharge, lwd = 4) +
       # mapview(zones) +
       mapview(sous_zones) +
