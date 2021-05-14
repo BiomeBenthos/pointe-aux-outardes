@@ -28,8 +28,6 @@ uid5 <- stringr::str_detect(tmp, '-5x')
 uid <- as.logical(uid1 + uid2 + uid3 + uid4 + uid5)
 stations <- samples[uid, ]
 stations_supplementaires <- samples[!uid, ]
-st_write(stations, './data/stations.kml')
-st_write(stations_supplementaires, './data/stations_supplementaires.kml')
 bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE) %>%
                 mutate(name = "Bathymétrie 0m") %>%
                 select(name)
@@ -56,6 +54,13 @@ knitr::kable(samples[uid, ], col.names = c('Station', 'Longitude','Latitude'), r
 
 knitr::kable(samples[!uid, ], col.names = c('Station supplémentaires', 'Longitude','Latitude'), row.names = FALSE) %>%
     kableExtra::kable_styling(full_width = F, position = "left")
+
+
+# Export kml
+stations <- st_transform(stations, 4326)
+stations_supplementaires <- st_transform(stations_supplementaires, 4326)
+st_write(stations, './data/stations.kml', delete_dsn = TRUE)
+st_write(stations_supplementaires, './data/stations_supplementaires.kml', delete_dsn = TRUE)
 
 
 ```
