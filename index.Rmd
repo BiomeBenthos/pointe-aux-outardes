@@ -13,12 +13,24 @@ output:
 }
 </style>
 
+# Stations 2022 
+
 ```{r, echo = FALSE, warnings = FALSE, message = FALSE, fig.width = 14, fig.height = 7}
-library(pao)
+# library(pao)
+library(sf)
+library(magrittr)
+library(tidyverse)
+library(mapview)
+mapviewOptions(fgb = FALSE)
 recharge <- st_read("./data/recharge.geojson", quiet = TRUE)
 zones <- st_read("./data/zones.geojson", quiet = TRUE)
 sous_zones <- st_read("./data/sous_zones.geojson", quiet = TRUE)
-samples <- st_read("./data/samples.geojson", quiet = TRUE)
+bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE) %>%
+                mutate(name = "Bathymétrie 0m") %>%
+                select(name)
+                
+# 2022
+samples <- st_read("./data/samples_2022.geojson", quiet = TRUE)
 tmp <- paste0(samples$name, 'x')
 uid1 <- stringr::str_detect(tmp, '-1x')
 uid2 <- stringr::str_detect(tmp, '-2x')
@@ -26,21 +38,19 @@ uid3 <- stringr::str_detect(tmp, '-3x')
 uid4 <- stringr::str_detect(tmp, '-4x')
 uid5 <- stringr::str_detect(tmp, '-5x')
 uid <- as.logical(uid1 + uid2 + uid3 + uid4 + uid5)
-stations <- samples[uid, ]
-stations_supplementaires <- samples[!uid, ]
-bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE) %>%
-                mutate(name = "Bathymétrie 0m") %>%
-                select(name)
+stations_2022 <- samples[uid, ]
+stations_supplementaires_2022 <- samples[!uid, ]
+
 
 # Mapview
-mv <- mapview(bathymetrie0) +
+mv_2022 <- mapview(bathymetrie0) +
       mapview(recharge, lwd = 4) +
       # mapview(zones) +
       mapview(sous_zones) +
-      mapview(stations, cex = 4) +
-      mapview(stations_supplementaires, cex = 4)
+      mapview(stations_2022, cex = 4) +
+      mapview(stations_supplementaires_2022, cex = 4)
 
-mv
+mv_2022
 
 # Table of stations
 samples <- st_transform(samples, 4326)
@@ -57,10 +67,69 @@ knitr::kable(samples[!uid, ], col.names = c('Station supplémentaires', 'Longitu
 
 
 # Export kml
-stations <- st_transform(stations, 4326)
-stations_supplementaires <- st_transform(stations_supplementaires, 4326)
-st_write(stations, './data/stations.kml', delete_dsn = TRUE)
-st_write(stations_supplementaires, './data/stations_supplementaires.kml', delete_dsn = TRUE)
+stations_2022 <- st_transform(stations_2022, 4326)
+stations_supplementaires_2022 <- st_transform(stations_supplementaires_2022, 4326)
+st_write(stations_2022, './data/stations_2022.kml', delete_dsn = TRUE)
+st_write(stations_supplementaires_2022, './data/stations_supplementaires_2022.kml', delete_dsn = TRUE)
+```
 
 
+# Stations 2021
+
+```{r, echo = FALSE, warnings = FALSE, message = FALSE, fig.width = 14, fig.height = 7}
+# library(pao)
+library(sf)
+library(magrittr)
+library(tidyverse)
+library(mapview)
+mapviewOptions(fgb = FALSE)
+recharge <- st_read("./data/recharge.geojson", quiet = TRUE)
+zones <- st_read("./data/zones.geojson", quiet = TRUE)
+sous_zones <- st_read("./data/sous_zones.geojson", quiet = TRUE)
+bathymetrie0 <- st_read("./data/bathymetrie.geojson", quiet = TRUE) %>%
+                mutate(name = "Bathymétrie 0m") %>%
+                select(name)
+                
+# 2021
+samples <- st_read("./data/samples_2021.geojson", quiet = TRUE)
+tmp <- paste0(samples$name, 'x')
+uid1 <- stringr::str_detect(tmp, '-1x')
+uid2 <- stringr::str_detect(tmp, '-2x')
+uid3 <- stringr::str_detect(tmp, '-3x')
+uid4 <- stringr::str_detect(tmp, '-4x')
+uid5 <- stringr::str_detect(tmp, '-5x')
+uid <- as.logical(uid1 + uid2 + uid3 + uid4 + uid5)
+stations_2021 <- samples[uid, ]
+stations_supplementaires_2021 <- samples[!uid, ]
+
+
+# Mapview
+mv_2021 <- mapview(bathymetrie0) +
+      mapview(recharge, lwd = 4) +
+      # mapview(zones) +
+      mapview(sous_zones) +
+      mapview(stations_2021, cex = 4) +
+      mapview(stations_supplementaires_2021, cex = 4)
+
+mv_2021
+
+# Table of stations
+samples <- st_transform(samples, 4326)
+xy <- st_coordinates(samples)
+prj <- st_crs(samples)
+samples <- st_drop_geometry(samples)
+samples <- cbind(samples, xy)
+cat(paste0('Projection: ', prj$input, ' (EPSG: ', prj$epsg, ')'))
+knitr::kable(samples[uid, ], col.names = c('Station', 'Longitude','Latitude'), row.names = FALSE) %>%
+    kableExtra::kable_styling(full_width = F, position = "left")
+
+knitr::kable(samples[!uid, ], col.names = c('Station supplémentaires', 'Longitude','Latitude'), row.names = FALSE) %>%
+    kableExtra::kable_styling(full_width = F, position = "left")
+
+
+# Export kml
+stations_2021 <- st_transform(stations_2021, 4326)
+stations_supplementaires_2021 <- st_transform(stations_supplementaires_2021, 4326)
+st_write(stations_2021, './data/stations_2021.kml', delete_dsn = TRUE)
+st_write(stations_supplementaires_2021, './data/stations_supplementaires_2021.kml', delete_dsn = TRUE)
 ```

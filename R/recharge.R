@@ -1,4 +1,4 @@
-library(pao)
+# library(pao)
 # Site de recharge
 recharge_arriere <- st_read('analysis/data/PTO/Recharge_shp/arriere_recharge_construction.shp', quiet = TRUE) %>%
                     st_zm() %>% mutate(description = 'Recharge arriève') %>%
