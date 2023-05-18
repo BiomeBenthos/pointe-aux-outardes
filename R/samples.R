@@ -20,5 +20,13 @@ for(i in 1:nrow(sous_zones)) {
   samples[[i]] <- sampling(sous_zones[i, ])
 }
 samples <- bind_rows(samples)
-st_write(samples, './data/samples_2022.geojson', delete_dsn = TRUE)
+#st_write(samples, './data/samples_2022.geojson', delete_dsn = TRUE)
+
+# Samples 2023
+samples <- list()
+for(i in 1:nrow(sous_zones)) {
+  samples[[i]] <- sampling(sous_zones[i, ])
+}
+samples <- bind_rows(samples)
+st_write(samples, './data/samples_2023.geojson', delete_dsn = TRUE)
 
