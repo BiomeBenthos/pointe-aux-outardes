@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Pointes-aux-Outardes"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Accueil
+      - href: tablet_manual.qmd
+        text: Guide pour l'enregistrement de données
+
+format:
+  html:
+    theme: yeti
+    toc: true
+
+
