@@ -9,6 +9,8 @@ website:
         text: Accueil
       - href: tablet_manual.qmd
         text: Guide pour l'enregistrement de données
+      - href: sampled_pts.qmd
+        text: Cartes des points d'échantillonnage
 
 format:
   html:

@@ -40,7 +40,13 @@ vignettes/*.pdf
 
 # Project specific
 .DS_Store
+
 /analysis/data
 
-/.quarto/
-/_site/
+# Data collected and output results
+data/data_collected
+output
+
+# Quarto page
+qmd/.quarto/
+qmd/_site/

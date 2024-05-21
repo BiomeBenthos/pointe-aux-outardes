@@ -45,10 +45,7 @@ xyz <- xym %>%
        .[2,] %>%
        st_as_sf()
 xyz <- xym
-# Pour identifier les sites autour de la recharge
-buf <- st_buffer(xyz, d) %>%
-       st_cast("LINESTRING") %>%
-       st_intersection(bathy_adj1) %>%
+# Pour identifier les sites autour de la rechargefile:///tmp/RtmpAZJKEc/viewhtml67f02f50bcdf/index.html
        st_cast("POINT") %>%
        st_as_sf()
 
